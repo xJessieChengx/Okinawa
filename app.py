@@ -3,7 +3,8 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 
-import twder
+from engine.currencySearch import currencySearch #匯率
+
 app = Flask(__name__)
 
 # 設定你的Channel Access Token
@@ -46,11 +47,13 @@ def handle_message(event):
 	elif userSend == '再見':
 		line_bot_api.push_message()
 		message = StickerSendMessage(package_id='11538',sticker_id='51626494')
+	
 	#匯率
-	if userSend == '日幣':
-		dollerTuple = twder.now('JPY')
-		reply = '{}\n日幣的即期賣出價:{}'.format(dollerTuple[0],dollerTuple[4])
-		message = TextSendMessage(text=reply)
+	elif userSend == '美金':
+		message = TextSendMessage(text=currencySearch('USD'))
+	elif userSend == '日幣':
+		message = TextSendMessage(text=currencySearch('JPY'))
+
 	else:
 		message = TextSendMessage(text=userSend) #應聲蟲
 		#print('使用者傳的訊息{}:'.format(event.message.text))
