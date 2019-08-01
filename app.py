@@ -59,8 +59,9 @@ def handle_message(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-	twder.currencies()
-	message = TextSendMessage(text='時間:{}\n即期賣出:{}'.format(twder.now('JPY')[0][4]))
+	userSend = event.message.text
+	if userSend == '日幣':
+		message = TextSendMessage(text='時間:{}\n即期賣出:{}'.format(twder.now('JPY')[0][4]))
 	line_bot_api.reply_message(event.reply_token, message)
 
 import os
