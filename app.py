@@ -1,8 +1,8 @@
-from flask import Flask, request, abort, twder
+from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
-
+import twder
 app = Flask(__name__)
 
 # 設定你的Channel Access Token
