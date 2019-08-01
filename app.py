@@ -36,12 +36,16 @@ def callback():
 #接著透過LineBotApi物件中reply_message()方法，回傳相同的訊息內容
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-	message = TextSendMessage(text='Hi')
+	print('執行TextMessage')
+	print('使用者傳的訊息{}:'.format(event.message.text))
+	message = TextSendMessage(text=event.message.text) #應聲蟲
+	#message = TextSendMessage(text='hi')
 	line_bot_api.reply_message(event.reply_token, message)
 
 @handler.add(MessageEvent, message=StickerMessage)
 def handle_message(event):
-	message = TextSendMessage(text='我看不懂貼圖')
+	print('執行StickerMessage')
+	message = TextSendMessage(text='嗚嗚~我看不懂貼圖')
 	line_bot_api.reply_message(event.reply_token, message)
 
 import os
