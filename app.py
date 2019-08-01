@@ -39,12 +39,12 @@ def handle_message(event):
 	print('執行TextMessage')
 
 	userSend = event.message.text
-	userID = event.source.user_id
+	userID = event.source.user_id #MyLineId: U6e27956abc389f5cdd25fb8e0cb797ea
 
 	if userSend == '你好':
 		message = TextSendMessage(text='Hello, ' + userID)
 	elif userSend == '再見':
-		message = TextSendMessage(text='Goodbye')
+		message = StickerSendMessage(package_id='11538',sticker_id='51626494')
 	else:
 		message = TextSendMessage(text=userSend) #應聲蟲
 		#print('使用者傳的訊息{}:'.format(event.message.text))
