@@ -37,9 +37,12 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	print('執行TextMessage')
+
 	userSend = event.message.text
+	userID = event.source.user_id
+
 	if userSend == '你好':
-		message = TextSendMessage(text='Hello')
+		message = TextSendMessage(text='Hello, ' + userID)
 	elif userSend == '再見':
 		message = TextSendMessage(text='Goodbye')
 	else:
