@@ -47,12 +47,13 @@ def handle_message(event):
 	elif userSend == '再見':
 		line_bot_api.push_message()
 		message = StickerSendMessage(package_id='11538',sticker_id='51626494')
-	
 	#匯率
 	elif userSend == '美金':
 		message = TextSendMessage(text=currencySearch('USD'))
 	elif userSend == '日幣':
 		message = TextSendMessage(text=currencySearch('JPY'))
+	elif userSend == ['CNY', 'THB', 'SEK', 'USD', 'IDR', 'AUD', 'NZD', 'PHP', 'MYR', 'GBP', 'ZAR', 'CHF', 'VND', 'EUR', 'KRW', 'SGD', 'JPY', 'CAD', 'HKD']:
+		message = TextSendMessage(text=currencySearch(userSend))
 
 	else:
 		message = TextSendMessage(text=userSend) #應聲蟲
