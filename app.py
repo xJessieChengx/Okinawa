@@ -2,6 +2,7 @@ from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
+
 import twder
 app = Flask(__name__)
 
@@ -45,6 +46,11 @@ def handle_message(event):
 	elif userSend == '再見':
 		line_bot_api.push_message()
 		message = StickerSendMessage(package_id='11538',sticker_id='51626494')
+	#匯率
+	if userSend == '日幣':
+		dollerTuple = twder.now('JPY')
+		reply = '{}\n日幣的即期賣出價:{}'.format(dollerTuple[0],dollerTuple[4])
+		message = TextSendMessage(text=reply)
 	else:
 		message = TextSendMessage(text=userSend) #應聲蟲
 		#print('使用者傳的訊息{}:'.format(event.message.text))
@@ -55,13 +61,6 @@ def handle_message(event):
 def handle_message(event):
 	print('執行StickerMessage')
 	message = TextSendMessage(text='嗚嗚~我看不懂貼圖')
-	line_bot_api.reply_message(event.reply_token, message)
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-	userSend = event.message.text
-	if userSend == '日幣':
-		message = TextSendMessage(text='時間:{}\n即期賣出:{}'.format(twder.now('JPY')[0][4]))
 	line_bot_api.reply_message(event.reply_token, message)
 
 import os
