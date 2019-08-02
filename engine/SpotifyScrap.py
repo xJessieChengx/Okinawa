@@ -28,7 +28,8 @@ def scrapSpotify():
 			break
 
 	random.shuffle(songReplyList)
-	reply = []
+	columnReply = []
+	textReply = ''
 	for song in songReplyList[0:5]:
 		reply.append(
 			ImageCarouselColumn(
@@ -39,4 +40,5 @@ def scrapSpotify():
 				)
 			)
 		)
+		textReply += '🔵{} by{}🔵\n🔵{}\n'.format(song[1],song[0],song[2])
 	return reply

@@ -1,5 +1,4 @@
 from flask import Flask, request, abort
-
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
@@ -9,6 +8,16 @@ from engine.OWM import OWMLonLatsearch #天氣查詢
 from engine.AQI import AQImonitor #空氣品質
 from engine.gamma import gammamonitor #輻射值
 from engine.SpotifyScrap import scrapSpotify #Spotify隨機音樂
+
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+scope=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name('Okinawa.json',scope)
+
+client = gspread.authorize(creds)
+
+LineBotSheet = client.open('OkinawaLineBot')
+usersSheet = LineBotSheet.worksheet('users')
 
 app = Flask(__name__)
 
@@ -45,17 +54,27 @@ def handle_message(event):
 	print('執行TextMessage')
 
 	userSend = event.message.text
-	userID = event.source.user_id #MyLineId: U6e27956abc389f5cdd25fb8e0cb797ea
+	userID = event.source.user_id
+	try:
+		cell = userSheet.find(userID)
+		userRow = cell.row
+		userCol = cell.col
+		status = usersSheet.cell(cell.row,2).value
+	except:
+		usersSheet.append_row([userID])
+		cell = userSheet.find(userID)
+		userRow = cell.row
+		userCol = cell.col
+		status = ''
 
 	if userSend == '你好':
 		message = TextSendMessage(text='Hello, ' + userID)
-	elif userSend == '再見':
-		line_bot_api.push_message()
-		message = StickerSendMessage(package_id='11538',sticker_id='51626494')
+
+	elif userSend == '天氣':
+		usersSheet.update_cell(userRow,2,'天氣查詢')
+		message = TextSendMessage(text='請傳送你的座標')
 	
 	#幣值查詢
-	elif userSend == '美金':
-		message = TextSendMessage(text=currencySearch('USD'))
 	elif userSend == '日幣':
 		message = TextSendMessage(text=currencySearch('JPY'))
 	elif userSend in ['CNY', 'THB', 'SEK', 'USD', 'IDR', 'AUD', 'NZD', 'PHP', 'MYR', 'GBP', 'ZAR', 'CHF', 'VND', 'EUR', 'KRW', 'SGD', 'JPY', 'CAD', 'HKD']:
@@ -90,10 +109,10 @@ def handle_message(event):
 			)
 		)
 	elif userSend in ['spotify','音樂','music']:
-		message = TemplateSendMessage(
-			alt_text='歌曲清單',
+		columnReply,textReply = TemplateSendMessage(
+			alt_text=textReply,
 			template=ImageCarouselTemplate(
-				columns=scrapSpotify()
+				columns=columnReply
 			)
 		)
 	else:
@@ -104,16 +123,34 @@ def handle_message(event):
 
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_message(event):
-	userAddress = event.message.address
-	userLat = event.message.latitude
-	userLon = event.message.longitude
 
-	weatherResult = OWMLonLatsearch(userLon,userLat) #天氣查詢
-	AQIResult = AQImonitor(userLon,userLat) #空氣品質
-	gammaResult = gammamonitor(userLon,userLat) #輻射值
+	userID = event.source.user_id
 
-	message = TextSendMessage(text='💨天氣狀況：\n{}\n📣空氣品質：{}\n\n💥輻射值：\n{}'.format(weatherResult,AQIResult,gammaResult))
+	try:
+		cell = userSheet.find(userID)
+		userRow = cell.row
+		userCol = cell.col
+		status = usersSheet.cell(cell.row,2).value
+	except:
+		usersSheet.append_row([userID])
+		cell = userSheet.find(userID)
+		userRow = cell.row
+		userCol = cell.col
+		status = ''
+
+	if status == '天氣查詢':
+		userAddress = event.message.address
+		userLat = event.message.latitude
+		userLon = event.message.longitude
+
+		weatherResult = OWMLonLatsearch(userLon,userLat) #天氣查詢
+		AQIResult = AQImonitor(userLon,userLat) #空氣品質
+		gammaResult = gammamonitor(userLon,userLat) #輻射值
+		usersSheet.update_cell(userRow,2,'天氣查詢')
+		message = TextSendMessage(text='💨天氣狀況：\n{}\n📣空氣品質：{}\n\n💥輻射值：\n{}'.format(weatherResult,AQIResult,gammaResult))
 	#message = TextSendMessage(text='地址：{}\n經度：{}\n緯度：{}'.format(userAddress,userLat,userLon))
+	else:
+		message = TextSendMessage(text='傳遞地址幹嘛?')
 	line_bot_api.reply_message(event.reply_token, message)
 
 
