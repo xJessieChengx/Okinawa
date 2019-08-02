@@ -7,7 +7,7 @@ from engine.currencySearch import currencySearch #幣值查詢
 from engine.OWM import OWMLonLatsearch #天氣查詢
 from engine.AQI import AQImonitor #空氣品質
 from engine.gamma import gammamonitor #輻射值
-from engine.SpotifyScrap import scrapSpotify #Spotify隨機音樂
+#from engine.SpotifyScrap import scrapSpotify #Spotify隨機音樂
 
 app = Flask(__name__)
 
