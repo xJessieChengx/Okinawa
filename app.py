@@ -65,7 +65,11 @@ def handle_message(event):
 #天氣查詢
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_message(event):
-	message = TextSendMessage(text='地圖訊息')
+	userAddress = event.message.address
+	userLat = event.message.latitude
+	userLon = event.message.longitude
+
+	message = TextSendMessage(text='地址:{}\n經度:{}\n緯度:{}'.format(userAddress,userLat,userLon))
 	line_bot_api.reply_message(event.reply_token, message)
 
 @handler.add(MessageEvent, message=StickerMessage)
