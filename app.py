@@ -68,13 +68,21 @@ def handle_message(event):
 		        title='沖繩國際通',
 		        text='請選擇動作',
 		        actions=[
+		        	MessageAction(
+		                label='美金',
+		                text='USD'
+		            ),
+		        	MessageAction(
+		                label='日幣',
+		                text='JPY'
+		            ),
 		            MessageAction(
 		                label='你好',
 		                text='你好'
 		            ),
 		            URIAction(
 		                label='帶我去 國際通',
-		                uri='http://www.biteamap.com/blog/post/413667838-%E6%B2%96%E7%B9%A9-x-%E5%9C%8B%E9%9A%9B%E9%80%9A%E7%89%B9%E8%BC%AF-x-%E4%B8%8D%E7%94%A8%E7%A7%9F%E8%BB%8A%E4%B9%9F%E5%8F%AF%E4%BB%A5%E7%8E%A9%E6%B2%96%E7%B9%A9/'
+		                uri='http://www.biteamap.com'
 		            )
 		        ]
 		    )
