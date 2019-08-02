@@ -7,6 +7,7 @@ from engine.currencySearch import currencySearch #幣值查詢
 from engine.OWM import OWMLonLatsearch #天氣查詢
 from engine.AQI import AQImonitor #空氣品質
 from engine.gamma import gammamonitor #輻射值
+from engine.SpotifyScrap import scrapSpotify #Spotify隨機音樂
 
 app = Flask(__name__)
 
@@ -61,7 +62,7 @@ def handle_message(event):
 
 	#Buttons template
 	elif userSend == '國際通':
-		buttons_template_message = TemplateSendMessage(
+		message = TemplateSendMessage(
 		    alt_text='這是一個按鈕選單',
 		    template=ButtonsTemplate(
 		        thumbnail_image_url='http://img.biteamap.com/flickr/16607675439_2eabbe13a9_c.jpg',
@@ -87,7 +88,31 @@ def handle_message(event):
 		        ]
 		    )
 		)
-
+	# #音樂推薦
+	# elif userSend in ['spotify','音樂','music']:
+	# 	message = TemplateSendMessage(
+	# 	    alt_text='ImageCarousel template',
+	# 	    template=ImageCarouselTemplate(
+	# 	        columns=[
+	# 	            ImageCarouselColumn(
+	# 	                image_url='https://example.com/item1.jpg',
+	# 	                action=PostbackAction(
+	# 	                    label='postback1',
+	# 	                    display_text='postback text1',
+	# 	                    data='action=buy&itemid=1'
+	# 	                )
+	# 	            ),
+	# 	            ImageCarouselColumn(
+	# 	                image_url='https://example.com/item2.jpg',
+	# 	                action=PostbackAction(
+	# 	                    label='postback2',
+	# 	                    display_text='postback text2',
+	# 	                    data='action=buy&itemid=2'
+	# 	                )
+	# 	            )
+	# 	        ]
+	# 	    )
+	# 	)
 	else:
 		message = TextSendMessage(text=userSend) #應聲蟲
 		#print('使用者傳的訊息{}:'.format(event.message.text))
