@@ -147,7 +147,7 @@ def handle_message(event):
 		message = TextSendMessage(text='💨天氣狀況：\n{}\n📣空氣品質：{}\n\n💥輻射值：\n{}'.format(weatherResult,AQIResult,gammaResult))
 		#message = TextSendMessage(text='地址：{}\n經度：{}\n緯度：{}'.format(userAddress,userLat,userLon))
 	else:
-		message = TextSendMessage(text='傳遞地址幹嘛?')
+		message = TextSendMessage(text='傳地址幹嘛?')
 	line_bot_api.reply_message(event.reply_token, message)
 
 #回覆貼圖訊息
