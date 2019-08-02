@@ -3,7 +3,10 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 
-from engine.currencySearch import currencySearch #匯率
+from engine.currencySearch import currencySearch #幣值查詢
+from engine.OWM import OWMLonLatsearch #天氣查詢
+from engine.AQI import AQImonitor #空氣品質
+from engine.gamma import gammamonitor #輻射值
 
 app = Flask(__name__)
 
@@ -62,16 +65,22 @@ def handle_message(event):
 		#message = TextSendMessage(text=event.message.text) #應聲蟲
 	line_bot_api.reply_message(event.reply_token, message)
 
-#天氣查詢
+#
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_message(event):
 	userAddress = event.message.address
 	userLat = event.message.latitude
 	userLon = event.message.longitude
+	weatherResult = OWMLonLatsearch(userLon,userLat) #天氣查詢
+	AQIResult = AQImonitor(userLon,userLat) #空氣品質
+	gammaResult = gammamonitor(userLon,userLat) #輻射值
 
-	message = TextSendMessage(text='地址:{}\n經度:{}\n緯度:{}'.format(userAddress,userLat,userLon))
+	message = TextSendMessage(text='💨天氣狀況：\n{}\n📣空氣品質：\n{}\n💥輻射值：\n{}'.format(weatherResult,AQIResult,gammaResult))
+	#message = TextSendMessage(text='地址：{}\n經度：{}\n緯度：{}'.format(userAddress,userLat,userLon))
 	line_bot_api.reply_message(event.reply_token, message)
 
+
+#回覆貼圖訊息
 @handler.add(MessageEvent, message=StickerMessage)
 def handle_message(event):
 	print('執行StickerMessage')
