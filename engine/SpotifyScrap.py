@@ -21,24 +21,25 @@ def scrapSpotify():
 		artist = song.select('.chart-table-track span')[0].text[3:]
 		songName = song.select('.chart-table-track strong')[0].text
 		songlink = song.select('.chart-table-image a')[0]['href']
-		imglink = bigImgLink(songlink)
-		songReplyList.append([artist,songName,songlink,imglink])
+		imglink = ''
+		songReplyList.append([artist,songName,songlink])
 
-		if index == 49:
+		if index == 29:
 			break
 
 	random.shuffle(songReplyList)
 	columnReply = []
 	textReply = ''
 	for song in songReplyList[0:5]:
-		reply.append(
+		columnReply.append(
 			ImageCarouselColumn(
-				image_url=song[3],
+				image_url=bigImgLink(song[2]),
 				action=URIAction(
 					label='listen',
 					uri=song[2]
 				)
 			)
 		)
-		textReply += '🔵{} by{}🔵\n🔵{}\n'.format(song[1],song[0],song[2])
-	return reply
+		textReply += '⭐{} by {}\n💽{}\n'.format(song[1],song[0],song[2])
+
+	return columnReply,textReply

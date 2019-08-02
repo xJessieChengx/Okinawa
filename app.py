@@ -1,4 +1,5 @@
 from flask import Flask, request, abort
+
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
@@ -8,16 +9,16 @@ from engine.OWM import OWMLonLatsearch #天氣查詢
 from engine.AQI import AQImonitor #空氣品質
 from engine.gamma import gammamonitor #輻射值
 from engine.SpotifyScrap import scrapSpotify #Spotify隨機音樂
-
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
 scope=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('Okinawa.json',scope)
 
 client = gspread.authorize(creds)
-
 LineBotSheet = client.open('OkinawaLineBot')
-usersSheet = LineBotSheet.worksheet('users')
+userStatusSheet = LineBotSheet.worksheet('userStatus')
+userInfoSheet = LineBotSheet.worksheet('userInfo')
 
 app = Flask(__name__)
 
@@ -55,83 +56,86 @@ def handle_message(event):
 	userSend = event.message.text
 	userID = event.source.user_id
 	try:
-		cell = usersSheet.find(userID)
+		cell = userStatusSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
-		status = usersSheet.cell(cell.row,2).value
+		status = userStatusSheet.cell(cell.row,2).value
 	except:
-		usersSheet.append_row([userID])
-		cell = usersSheet.find(userID)
+		userStatusSheet.append_row([userID])
+		userInfoSheet.append_row([userID])
+		cell = userStatusSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
 		status = ''
-
-	if userSend == '你好':
-		message = TextSendMessage(text='Hello, ' + userID)
-
-	elif userSend == '天氣':
-		usersSheet.update_cell(userRow,2,'天氣查詢')
-		message = TextSendMessage(text='請傳送你的座標')
-	
-	#幣值查詢
-	elif userSend == '日幣':
-		message = TextSendMessage(text=currencySearch('JPY'))
-	elif userSend in ['CNY', 'THB', 'SEK', 'USD', 'IDR', 'AUD', 'NZD', 'PHP', 'MYR', 'GBP', 'ZAR', 'CHF', 'VND', 'EUR', 'KRW', 'SGD', 'JPY', 'CAD', 'HKD']:
-		message = TextSendMessage(text=currencySearch(userSend))
-
-	#Buttons template
-	elif userSend == '國際通':
-		message = TemplateSendMessage(
-			alt_text='這是一個按鈕選單',
-			template=ButtonsTemplate(
-				thumbnail_image_url='https://www.japanyokoso.com/pac_dir/spot/2017/L01387_A_01_ypb.jpg',
-				title='沖繩國際通',
-				text='請選擇動作',
-				actions=[
-					MessageAction(
-						label='美金',
-						text='USD'
-					),
-					MessageAction(
-						label='日幣',
-						text='JPY'
-					),
-					MessageAction(
-						label='你好',
-						text='你好'
-					),
-					URIAction(
-						label='帶我去國際通',
-						uri='http://tc.tabirai.net/sightseeing/article/okinawa-kokusaidori-tourist/'
-					)
-				]
+	if status == '':
+		message = TextSendMessage(text='請輸入姓名,讓我認識你!')
+		userStatusSheet = update_cell(userRow,2,'註冊中')
+	elif status == '註冊中':
+		userInfoSheet.update_cell(userRow, 2, userSend)
+		userStatusSheet.update_cell(userRow, 2, '已註冊')
+		message = TextSendMessage(text='Hi,{}'.format(userSend))
+	elif status == '已註冊':
+		if userSend == '你好':
+			userName = userInfoSheet.cell(cell.row,2).value
+			message = TextSendMessage(text='Hello, ' + userName)
+		elif userSend == '天氣':
+			userStatusSheet.update_cell(userRow, 2, '天氣查詢')
+			message = TextSendMessage(text='請傳送你的座標')
+		#幣值
+		elif userSend in ['CNY', 'THB', 'SEK', 'USD', 'IDR', 'AUD', 'NZD', 'PHP', 'MYR', 'GBP', 'ZAR', 'CHF', 'VND', 'EUR', 'KRW', 'SGD', 'JPY', 'CAD', 'HKD']:
+			message = TextSendMessage(text=currencySearch(userSend))
+		#Buttons template
+		elif userSend == '國際通':
+			message = TemplateSendMessage(
+				alt_text='這是一個按鈕選單',
+				template=ButtonsTemplate(
+					thumbnail_image_url='https://www.japanyokoso.com/pac_dir/spot/2017/L01387_A_01_ypb.jpg',
+					title='沖繩國際通',
+					text='請選擇動作',
+					actions=[
+						MessageAction(
+							label='美金',
+							text='USD'
+						),
+						MessageAction(
+							label='日幣',
+							text='JPY'
+						),
+						MessageAction(
+							label='你好',
+							text='你好'
+						),
+						URIAction(
+							label='帶我去國際通',
+							uri='http://tc.tabirai.net/sightseeing/article/okinawa-kokusaidori-tourist/'
+						)
+					]
+				)
 			)
-		)
-	elif userSend in ['spotify','音樂','music']:
-		columnReply,textReply = TemplateSendMessage(
-			alt_text=textReply,
-			template=ImageCarouselTemplate(
-				columns=columnReply
+		elif userSend in ['spotify','音樂','music']:
+			columnReply,textReply = TemplateSendMessage(
+				alt_text=textReply,
+				template=ImageCarouselTemplate(
+					columns=columnReply
+				)
 			)
-		)
-	else:
-		message = TextSendMessage(text=userSend) #應聲蟲
-		#print('使用者傳的訊息{}:'.format(event.message.text))
-		#message = TextSendMessage(text=event.message.text) #應聲蟲
+		else:
+			message = TextSendMessage(text=userSend) #應聲蟲
+				#print('使用者傳的訊息{}:'.format(event.message.text))
+				#message = TextSendMessage(text=event.message.text) #應聲蟲
 	line_bot_api.reply_message(event.reply_token, message)
 
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_message(event):
 	userID = event.source.user_id
-
 	try:
-		cell = usersSheet.find(userID)
+		cell = userStatusSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
-		status = usersSheet.cell(cell.row,2).value
+		status = userStatusSheet.cell(cell.row,2).value
 	except:
-		usersSheet.append_row([userID])
-		cell = usersSheet.find(userID)
+		userStatusSheet.append_row([userID])
+		cell = userStatusSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
 		status = ''
@@ -143,7 +147,7 @@ def handle_message(event):
 		weatherResult = OWMLonLatsearch(userLon,userLat) #天氣查詢
 		AQIResult = AQImonitor(userLon,userLat) #空氣品質
 		gammaResult = gammamonitor(userLon,userLat) #輻射值
-		usersSheet.update_cell(userRow,2,'天氣查詢')
+		userStatusSheet.update_cell(userRow,2,'已註冊')
 		message = TextSendMessage(text='💨天氣狀況：\n{}\n📣空氣品質：{}\n\n💥輻射值：\n{}'.format(weatherResult,AQIResult,gammaResult))
 		#message = TextSendMessage(text='地址：{}\n經度：{}\n緯度：{}'.format(userAddress,userLat,userLon))
 	else:
