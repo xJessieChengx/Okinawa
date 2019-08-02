@@ -45,7 +45,6 @@ def callback():
 def showWeb():
 	return '<h1>Hello Every one</h1>'
 
-
 #處理訊息
 #當訊息種類為TextMessage時，從event中取出訊息內容，藉由TextSendMessage()包裝成符合格式的物件，並貼上message的標籤方便之後取用。
 #接著透過LineBotApi物件中reply_message()方法，回傳相同的訊息內容
@@ -56,13 +55,13 @@ def handle_message(event):
 	userSend = event.message.text
 	userID = event.source.user_id
 	try:
-		cell = userSheet.find(userID)
+		cell = usersSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
 		status = usersSheet.cell(cell.row,2).value
 	except:
 		usersSheet.append_row([userID])
-		cell = userSheet.find(userID)
+		cell = usersSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
 		status = ''
@@ -123,21 +122,19 @@ def handle_message(event):
 
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_message(event):
-
 	userID = event.source.user_id
 
 	try:
-		cell = userSheet.find(userID)
+		cell = usersSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
 		status = usersSheet.cell(cell.row,2).value
 	except:
 		usersSheet.append_row([userID])
-		cell = userSheet.find(userID)
+		cell = usersSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
 		status = ''
-
 	if status == '天氣查詢':
 		userAddress = event.message.address
 		userLat = event.message.latitude
@@ -148,11 +145,10 @@ def handle_message(event):
 		gammaResult = gammamonitor(userLon,userLat) #輻射值
 		usersSheet.update_cell(userRow,2,'天氣查詢')
 		message = TextSendMessage(text='💨天氣狀況：\n{}\n📣空氣品質：{}\n\n💥輻射值：\n{}'.format(weatherResult,AQIResult,gammaResult))
-	#message = TextSendMessage(text='地址：{}\n經度：{}\n緯度：{}'.format(userAddress,userLat,userLon))
+		#message = TextSendMessage(text='地址：{}\n經度：{}\n緯度：{}'.format(userAddress,userLat,userLon))
 	else:
 		message = TextSendMessage(text='傳遞地址幹嘛?')
 	line_bot_api.reply_message(event.reply_token, message)
-
 
 #回覆貼圖訊息
 @handler.add(MessageEvent, message=StickerMessage)
