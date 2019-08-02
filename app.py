@@ -71,6 +71,7 @@ def handle_message(event):
 	userAddress = event.message.address
 	userLat = event.message.latitude
 	userLon = event.message.longitude
+	
 	weatherResult = OWMLonLatsearch(userLon,userLat) #天氣查詢
 	AQIResult = AQImonitor(userLon,userLat) #空氣品質
 	gammaResult = gammamonitor(userLon,userLat) #輻射值
