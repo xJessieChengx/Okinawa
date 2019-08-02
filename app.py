@@ -59,13 +59,34 @@ def handle_message(event):
 	elif userSend in ['CNY', 'THB', 'SEK', 'USD', 'IDR', 'AUD', 'NZD', 'PHP', 'MYR', 'GBP', 'ZAR', 'CHF', 'VND', 'EUR', 'KRW', 'SGD', 'JPY', 'CAD', 'HKD']:
 		message = TextSendMessage(text=currencySearch(userSend))
 
+	#Buttons template
+	elif userSend == '按鈕':
+		buttons_template_message = TemplateSendMessage(
+		    alt_text='這是一個按鈕選單',
+		    template=ButtonsTemplate(
+		        thumbnail_image_url='http://img.biteamap.com/flickr/16607675439_2eabbe13a9_c.jpg',
+		        title='沖繩 國際通',
+		        text='請選擇動作',
+		        actions=[
+		            MessageAction(
+		                label='你好',
+		                text='你好'
+		            ),
+		            URIAction(
+		                label='帶我去 國際通',
+		                uri='http://www.biteamap.com/blog/post/413667838-%E6%B2%96%E7%B9%A9-x-%E5%9C%8B%E9%9A%9B%E9%80%9A%E7%89%B9%E8%BC%AF-x-%E4%B8%8D%E7%94%A8%E7%A7%9F%E8%BB%8A%E4%B9%9F%E5%8F%AF%E4%BB%A5%E7%8E%A9%E6%B2%96%E7%B9%A9/'
+		            )
+		        ]
+		    )
+		)
+
 	else:
 		message = TextSendMessage(text=userSend) #應聲蟲
 		#print('使用者傳的訊息{}:'.format(event.message.text))
 		#message = TextSendMessage(text=event.message.text) #應聲蟲
 	line_bot_api.reply_message(event.reply_token, message)
 
-#
+
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_message(event):
 	userAddress = event.message.address
