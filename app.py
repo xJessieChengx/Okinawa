@@ -60,12 +60,12 @@ def handle_message(event):
 		message = TextSendMessage(text=currencySearch(userSend))
 
 	#Buttons template
-	elif userSend == '按鈕':
+	elif userSend == '國際通':
 		buttons_template_message = TemplateSendMessage(
 		    alt_text='這是一個按鈕選單',
 		    template=ButtonsTemplate(
 		        thumbnail_image_url='http://img.biteamap.com/flickr/16607675439_2eabbe13a9_c.jpg',
-		        title='國際通',
+		        title='沖繩國際通',
 		        text='請選擇動作',
 		        actions=[
 		            MessageAction(
