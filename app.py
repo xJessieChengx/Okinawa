@@ -65,7 +65,7 @@ def handle_message(event):
 		    alt_text='這是一個按鈕選單',
 		    template=ButtonsTemplate(
 		        thumbnail_image_url='http://img.biteamap.com/flickr/16607675439_2eabbe13a9_c.jpg',
-		        title='沖繩 國際通',
+		        title='國際通',
 		        text='請選擇動作',
 		        actions=[
 		            MessageAction(
