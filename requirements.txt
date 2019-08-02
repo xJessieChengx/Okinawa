@@ -4,4 +4,4 @@ flask
 twder
 six
 requests
-geodesic
+geopy
