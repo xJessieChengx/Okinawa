@@ -2,8 +2,6 @@ import requests
 import csv
 from geopy.distance import geodesic
 
-#輻射值
-
 def gammamonitor(lon,lat):
 	
 	url = 'http://www.aec.gov.tw/open/gammamonitor.csv'

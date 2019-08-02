@@ -1,7 +1,6 @@
 import requests
 from geopy.distance import geodesic
 
-
 def AQImonitor(lon,lat):
 	url = 'https://quality.data.gov.tw/dq_download_json.php?nid=40448&md5_url=05c834d071ad5b62eaf85658de4d2e6f'
 	r = requests.get(url).json()
