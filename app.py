@@ -47,7 +47,8 @@ def handle_message(event):
 	elif userSend == '再見':
 		line_bot_api.push_message()
 		message = StickerSendMessage(package_id='11538',sticker_id='51626494')
-	#匯率
+	
+	#幣值查詢
 	elif userSend == '美金':
 		message = TextSendMessage(text=currencySearch('USD'))
 	elif userSend == '日幣':
@@ -59,6 +60,12 @@ def handle_message(event):
 		message = TextSendMessage(text=userSend) #應聲蟲
 		#print('使用者傳的訊息{}:'.format(event.message.text))
 		#message = TextSendMessage(text=event.message.text) #應聲蟲
+	line_bot_api.reply_message(event.reply_token, message)
+
+#天氣查詢
+@handler.add(MessageEvent, message=LocationMessage)
+def handle_message(event):
+	message = TextSendMessage(text='地圖訊息')
 	line_bot_api.reply_message(event.reply_token, message)
 
 @handler.add(MessageEvent, message=StickerMessage)
