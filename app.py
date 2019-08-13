@@ -73,18 +73,21 @@ def handle_message(event):
 	elif status == '註冊中':
 		userInfoSheet.update_cell(userRow, 2, userSend)
 		userStatusSheet.update_cell(userRow, 2, '已註冊')
-		message = TextSendMessage(text='Hi,{}'.format(userSend))
+		message = TextSendMessage(text='Hello,{}'.format(userSend))
 	elif status == '已註冊':
 		if userSend == '你好':
 			userName = userInfoSheet.cell(cell.row,2).value
 			message = TextSendMessage(text='Hello, ' + userName)
+		elif userSend == '圖片':
+			message = ImageSendMessage(
+				original_content_url='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Chrome_icon_%28September_2014%29.svg/220px-Google_Chrome_icon_%28September_2014%29.svg.png',
+				preview_image_url='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Chrome_icon_%28September_2014%29.svg/220px-Google_Chrome_icon_%28September_2014%29.svg.png'
+			)
 		elif userSend == '天氣':
 			userStatusSheet.update_cell(userRow, 2, '天氣查詢')
 			message = TextSendMessage(text='請傳送你的座標')
-		#幣值
 		elif userSend in ['CNY', 'THB', 'SEK', 'USD', 'IDR', 'AUD', 'NZD', 'PHP', 'MYR', 'GBP', 'ZAR', 'CHF', 'VND', 'EUR', 'KRW', 'SGD', 'JPY', 'CAD', 'HKD']:
 			message = TextSendMessage(text=currencySearch(userSend))
-		#Buttons template
 		elif userSend == '國際通':
 			message = TemplateSendMessage(
 				alt_text='這是一個按鈕選單',
