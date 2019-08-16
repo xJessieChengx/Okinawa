@@ -1,0 +1,6 @@
+import imgkit
+
+css = ['myCSS.css']
+options={'quality':'100','width':'200'}
+config = imgkit.config(wkhtmltoimage='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe')
+imgkit.from_string(htmldoc, 'out.jpg',config=config,options=options, css=css)

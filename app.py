@@ -5,10 +5,12 @@ from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 
 from engine.currencySearch import currencySearch #幣值查詢
-from engine.OWM import OWMLonLatsearch #天氣查詢
 from engine.AQI import AQImonitor #空氣品質
 from engine.gamma import gammamonitor #輻射值
+from engine.OWM import OWMLonLatsearch #天氣查詢
 from engine.SpotifyScrap import scrapSpotify #Spotify隨機音樂
+from engine.bookingSysttem import booking #售票生成器
+from engine.movie import getMoviePoster #電影海報下載
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -19,6 +21,7 @@ client = gspread.authorize(creds)
 LineBotSheet = client.open('OkinawaLineBot')
 userStatusSheet = LineBotSheet.worksheet('userStatus')
 userInfoSheet = LineBotSheet.worksheet('userInfo')
+movieInfoSheet = LineBotSheet.worksheet('movie')
 
 app = Flask(__name__)
 
@@ -51,8 +54,7 @@ def showWeb():
 #接著透過LineBotApi物件中reply_message()方法，回傳相同的訊息內容
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-	print('執行TextMessage')
-
+	#print('執行TextMessage')
 	userSend = event.message.text
 	userID = event.source.user_id
 	try:
@@ -68,20 +70,25 @@ def handle_message(event):
 		userCol = cell.col
 		status = ''
 	if status == '':
-		message = TextSendMessage(text='請輸入姓名,讓我認識你!')
-		userStatusSheet = update_cell(userRow,2,'註冊中')
+		message = TextSendMessage(text='請輸入姓名, 讓我認識你!')
+		userStatusSheet.update_cell(userRow, 2, '註冊中')
 	elif status == '註冊中':
 		userInfoSheet.update_cell(userRow, 2, userSend)
 		userStatusSheet.update_cell(userRow, 2, '已註冊')
-		message = TextSendMessage(text='Hello,{}'.format(userSend))
+		message = TextSendMessage(text='Hi,{}'.format(userSend))
 	elif status == '已註冊':
 		if userSend == '你好':
 			userName = userInfoSheet.cell(cell.row,2).value
 			message = TextSendMessage(text='Hello, ' + userName)
-		elif userSend == '圖片':
-			message = ImageSendMessage(
-				original_content_url='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Chrome_icon_%28September_2014%29.svg/220px-Google_Chrome_icon_%28September_2014%29.svg.png',
-				preview_image_url='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Chrome_icon_%28September_2014%29.svg/220px-Google_Chrome_icon_%28September_2014%29.svg.png'
+		if userSend =='購票':
+			columnReply = getMoviePoster()
+			useserStatusSheet.update_cell(userRow, 2, '購票-0')
+			#圖片列表
+			message = TemplateSendMessage(
+				alt_text='電影資訊',
+				template=ImageCarouselTemplate(
+					columns=columnReply
+				)
 			)
 		elif userSend == '天氣':
 			userStatusSheet.update_cell(userRow, 2, '天氣查詢')
@@ -116,7 +123,8 @@ def handle_message(event):
 				)
 			)
 		elif userSend in ['spotify','音樂','music']:
-			columnReply,textReply = TemplateSendMessage(
+			columnReply,textReply = scrapSpotify()
+			message = TemplateSendMessage(
 				alt_text=textReply,
 				template=ImageCarouselTemplate(
 					columns=columnReply
@@ -124,8 +132,6 @@ def handle_message(event):
 			)
 		else:
 			message = TextSendMessage(text=userSend) #應聲蟲
-				#print('使用者傳的訊息{}:'.format(event.message.text))
-				#message = TextSendMessage(text=event.message.text) #應聲蟲
 	line_bot_api.reply_message(event.reply_token, message)
 
 @handler.add(MessageEvent, message=LocationMessage)
@@ -135,7 +141,7 @@ def handle_message(event):
 		cell = userStatusSheet.find(userID)
 		userRow = cell.row
 		userCol = cell.col
-		status = userStatusSheet.cell(cell.row,2).value
+		status = userStatusSheet.cell(cell.row,2).valuee
 	except:
 		userStatusSheet.append_row([userID])
 		cell = userStatusSheet.find(userID)
@@ -160,7 +166,6 @@ def handle_message(event):
 #回覆貼圖訊息
 @handler.add(MessageEvent, message=StickerMessage)
 def handle_message(event):
-	print('執行StickerMessage')
 	message = TextSendMessage(text='嗚嗚~我看不懂貼圖')
 	line_bot_api.reply_message(event.reply_token, message)
 
